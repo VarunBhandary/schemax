@@ -6,13 +6,13 @@ set -e
 
 echo "🚀 Installing Schemax - Databricks Schema Management CLI"
 
-# Check if Python 3.8+ is available
+# Check if Python 3.11+ is available
 python_version=$(python3 --version 2>&1 | grep -oE '[0-9]+\.[0-9]+' | head -1)
 major_version=$(echo $python_version | cut -d. -f1)
 minor_version=$(echo $python_version | cut -d. -f2)
 
-if [ "$major_version" -lt 3 ] || [ "$major_version" -eq 3 -a "$minor_version" -lt 8 ]; then
-    echo "❌ Error: Python 3.8 or higher is required. Found: $python_version"
+if [ "$major_version" -lt 3 ] || [ "$major_version" -eq 3 -a "$minor_version" -lt 11 ]; then
+    echo "❌ Error: Python 3.11 or higher is required. Found: $python_version"
     exit 1
 fi
 

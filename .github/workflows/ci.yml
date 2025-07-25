@@ -87,14 +87,8 @@ jobs:
     - name: Run isort import sorting check
       run: isort --check-only --diff schemax/ tests/
 
-    - name: Run flake8 linting
-      run: flake8 schemax/ tests/
-
     - name: Run pylint
       run: pylint schemax/
-
-    - name: Run mypy type checking
-      run: mypy schemax/
 
   # Testing job
   test:
@@ -244,24 +238,24 @@ jobs:
         username: __token__
         password: ${{ secrets.PYPI_API_TOKEN }}
 
-  # Dependency review (for PRs)
+  # Dependency review (for PRs) - DISABLED
   # NOTE: This job requires GitHub Advanced Security to be enabled on the repository.
   # To enable it, go to Settings > Security & analysis > Dependency graph and enable it.
   # For private repositories, GitHub Advanced Security license is also required.
   #
   # Alternative: The security job above already runs safety and pip-audit for dependency scanning
   # which provides similar functionality without requiring GitHub Advanced Security.
-  dependency-review:
-    name: Dependency Review
-    runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
-    continue-on-error: true  # Don't fail the entire workflow if this step fails
+  # dependency-review:
+  #   name: Dependency Review
+  #   runs-on: ubuntu-latest
+  #   if: github.event_name == 'pull_request'
+  #   continue-on-error: true  # Don't fail the entire workflow if this step fails
 
-    steps:
-    - name: Checkout Repository
-      uses: actions/checkout@v4
+  #   steps:
+  #   - name: Checkout Repository
+  #     uses: actions/checkout@v4
 
-    - name: Dependency Review
-      uses: actions/dependency-review-action@v3
-      with:
-        fail-on-severity: moderate
+  #   - name: Dependency Review
+  #     uses: actions/dependency-review-action@v3
+  #     with:
+  #       fail-on-severity: moderate

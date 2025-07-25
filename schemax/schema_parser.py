@@ -1,10 +1,12 @@
 """YAML schema parser for Schemax."""
 
-import yaml
 from pathlib import Path
-from typing import Dict, Any
-from .models import SchemaDefinition, Catalog, Schema, Table, Column
+from typing import Any, Dict
+
+import yaml
+
 from .exceptions import SchemaParsingError, ValidationError
+from .models import Catalog, Column, Schema, SchemaDefinition, Table
 
 
 class SchemaParser:

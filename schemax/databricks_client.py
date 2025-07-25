@@ -1,18 +1,19 @@
 """Databricks client for environment inspection."""
 
-from typing import Dict, List, Optional, Any
+from typing import Any, Dict, List, Optional
+
 from databricks.sdk import WorkspaceClient
 from databricks.sdk.errors import NotFound, PermissionDenied
 from databricks.sdk.service.catalog import (
     CatalogInfo,
+    ColumnInfo,
     SchemaInfo,
     TableInfo,
-    ColumnInfo,
 )
 
 from .config import Config
-from .models import CurrentState
 from .exceptions import DatabricksConnectionError
+from .models import CurrentState
 
 
 class DatabricksClient:
@@ -104,9 +105,15 @@ class DatabricksClient:
                 try:
                     detailed_table = self.client.tables.get(full_name=table.full_name)
                     table_info.update(self._table_to_dict(detailed_table))
-                except Exception:
+                except Exception as e:
                     # If we can't get detailed info, continue with basic info
-                    pass
+                    # Log the error for debugging but don't fail the entire operation
+                    import logging
+
+                    logger = logging.getLogger(__name__)
+                    logger.warning(
+                        f"Could not get detailed info for table {table.full_name}: {e}"
+                    )
 
                 tables[table.name] = table_info
 
@@ -196,5 +203,10 @@ class DatabricksClient:
         try:
             self.client.current_user.me()
             return True
-        except Exception:
+        except Exception as e:
+            # Log the connection error for debugging
+            import logging
+
+            logger = logging.getLogger(__name__)
+            logger.warning(f"Failed to test Databricks connection: {e}")
             return False

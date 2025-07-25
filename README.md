@@ -91,4 +91,47 @@ python -m pytest
 
 # Format code
 black schemax/
-``` 
+```
+
+## CI/CD Pipeline
+
+This project includes a comprehensive GitHub Actions workflow that runs:
+
+- **Security Scanning**: Bandit, Safety, and pip-audit for code and dependency security
+- **Code Quality**: Black formatting, isort, flake8, pylint, and mypy type checking
+- **Testing**: Unit tests with coverage reporting
+- **Build & Package**: Package building and validation
+- **Dependency Review**: Automated dependency vulnerability scanning
+
+### Dependency Review Setup
+
+The dependency review step requires GitHub Advanced Security features. If you encounter the error:
+
+```
+Dependency review is not supported on this repository
+```
+
+**Option 1: Enable GitHub Advanced Security (Recommended)**
+1. Go to your repository Settings
+2. Navigate to Security & analysis
+3. Enable "Dependency graph"
+4. For private repositories, ensure you have a GitHub Advanced Security license
+
+**Option 2: Use Alternative Security Scanning**
+The workflow already includes comprehensive security scanning via:
+- `safety` - Checks for known vulnerabilities in dependencies
+- `pip-audit` - Additional dependency vulnerability scanning
+- `bandit` - Static security analysis of Python code
+- `semgrep` - Advanced static analysis
+
+These tools provide similar functionality to the dependency review action without requiring GitHub Advanced Security.
+
+**Local Security Scanning**
+You can also run comprehensive security scans locally:
+
+```bash
+# Run the security scanning script
+./scripts/security-scan.sh
+```
+
+This script runs all security tools and generates detailed reports in the `security-reports/` directory. 

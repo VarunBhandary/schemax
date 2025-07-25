@@ -1,10 +1,12 @@
 """Configuration management for Schemax."""
 
 import os
-from typing import Optional, Dict, Any
 from pathlib import Path
+from typing import Any, Dict, Optional
+
 import yaml
 from pydantic import BaseModel, field_validator
+
 from .exceptions import ConfigurationError
 
 

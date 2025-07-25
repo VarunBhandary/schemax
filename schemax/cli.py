@@ -7,16 +7,16 @@ from pathlib import Path
 from typing import Optional
 
 import click
+from dotenv import load_dotenv
 from rich.console import Console
 from rich.panel import Panel
 from rich.progress import Progress, SpinnerColumn, TextColumn
-from dotenv import load_dotenv
 
-from .config import Config
-from .schema_parser import SchemaParser
-from .databricks_client import DatabricksClient
 from .change_generator import ChangeGenerator
+from .config import Config
+from .databricks_client import DatabricksClient
 from .exceptions import SchemaxError
+from .schema_parser import SchemaParser
 
 # Load environment variables
 load_dotenv()

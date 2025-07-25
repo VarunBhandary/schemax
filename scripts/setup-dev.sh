@@ -57,11 +57,11 @@ main() {
     PYTHON_VERSION=$(python3 -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')")
     log_info "Found Python $PYTHON_VERSION"
     
-    # Verify Python version is 3.8+
-    if python3 -c "import sys; exit(0 if sys.version_info >= (3, 8) else 1)"; then
+    # Verify Python version is 3.11+
+    if python3 -c "import sys; exit(0 if sys.version_info >= (3, 11) else 1)"; then
         log_success "Python version is compatible"
     else
-        log_error "Python 3.8 or higher is required. Found: $PYTHON_VERSION"
+        log_error "Python 3.11 or higher is required. Found: $PYTHON_VERSION"
         exit 1
     fi
     

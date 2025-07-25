@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """Main CLI interface for Schemax."""
 
-import os
 import sys
 from pathlib import Path
 from typing import Optional
@@ -35,7 +34,7 @@ def cli(ctx, verbose: bool, config_file: Optional[str]):
     ctx.obj["config"] = Config.load(config_file)
 
     if verbose:
-        console.print(f"[green]✓[/green] Loaded configuration", style="dim")
+        console.print("[green]✓[/green] Loaded configuration", style="dim")
 
 
 @cli.command()
@@ -79,7 +78,8 @@ def generate(
 
             if verbose:
                 console.print(
-                    f"[dim]Found {len(schema_def.schemas)} schema(s) in definition[/dim]"
+                    f"[dim]Found {len(schema_def.schemas)} "
+                    f"schema(s) in definition[/dim]"
                 )
 
             # Connect to Databricks
@@ -116,7 +116,7 @@ def generate(
                 console.print(f"[dim]{change_script.sql}[/dim]")
 
             if output:
-                Path(output).write_text(change_script.sql)
+                Path(output).write_text(change_script.sql, encoding="utf-8")
                 console.print(f"\n[green]✓[/green] Change script saved to {output}")
 
         else:
@@ -130,10 +130,10 @@ def generate(
             )
 
     except SchemaxError as e:
-        console.print(f"\n[red]Error:[/red] {e}", err=True)
+        console.print(f"\n[red]Error:[/red] {e}")
         sys.exit(1)
     except Exception as e:
-        console.print(f"\n[red]Unexpected error:[/red] {e}", err=True)
+        console.print(f"\n[red]Unexpected error:[/red] {e}")
         if verbose:
             import traceback
 
@@ -172,8 +172,8 @@ def apply(
         )
 
         # TODO: Implement apply logic
-        config = ctx.obj["config"]
-        databricks_client = DatabricksClient(config)
+        # config = ctx.obj["config"]
+        # databricks_client = DatabricksClient(config)
 
         if not auto_approve:
             if not click.confirm("\nDo you want to apply these changes?"):
@@ -182,11 +182,12 @@ def apply(
 
         console.print("\n[red]Apply functionality not yet implemented.[/red]")
         console.print(
-            "[dim]This will execute the generated SQL script against the target environment.[/dim]"
+            "[dim]This will execute the generated SQL script "
+            "against the target environment.[/dim]"
         )
 
     except SchemaxError as e:
-        console.print(f"\n[red]Error:[/red] {e}", err=True)
+        console.print(f"\n[red]Error:[/red] {e}")
         sys.exit(1)
 
 
@@ -208,10 +209,10 @@ def validate(ctx, schema_file: str):
         parser = SchemaParser()
         schema_def = parser.parse_file(schema_file)
 
-        console.print(f"[green]✓[/green] Schema definition is valid")
+        console.print("[green]✓[/green] Schema definition is valid")
 
         if verbose:
-            console.print(f"\n[bold]Summary:[/bold]")
+            console.print("\n[bold]Summary:[/bold]")
             console.print(f"  Catalog: {schema_def.catalog.name}")
             console.print(f"  Schemas: {len(schema_def.schemas)}")
 
@@ -219,7 +220,7 @@ def validate(ctx, schema_file: str):
             console.print(f"  Tables: {total_tables}")
 
     except SchemaxError as e:
-        console.print(f"\n[red]Validation Error:[/red] {e}", err=True)
+        console.print(f"\n[red]Validation Error:[/red] {e}")
         sys.exit(1)
 
 

@@ -1,11 +1,10 @@
 """Databricks client for environment inspection."""
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
 from databricks.sdk import WorkspaceClient
 from databricks.sdk.errors import NotFound, PermissionDenied
 from databricks.sdk.service.catalog import (
-    CatalogInfo,
     ColumnInfo,
     SchemaInfo,
     TableInfo,
@@ -29,7 +28,9 @@ class DatabricksClient:
             # Test connection
             self.client.current_user.me()
         except Exception as e:
-            raise DatabricksConnectionError(f"Failed to connect to Databricks: {e}")
+            raise DatabricksConnectionError(
+                f"Failed to connect to Databricks: {e}"
+            ) from e
 
     def get_current_state(
         self, catalog_name: str, schema_name: Optional[str] = None
@@ -73,11 +74,11 @@ class DatabricksClient:
         except PermissionDenied as e:
             raise DatabricksConnectionError(
                 f"Permission denied accessing catalog '{catalog_name}': {e}"
-            )
+            ) from e
         except Exception as e:
             raise DatabricksConnectionError(
                 f"Failed to inspect target environment: {e}"
-            )
+            ) from e
 
     def _get_schema_info(
         self, catalog_name: str, schema_name: str
@@ -112,7 +113,9 @@ class DatabricksClient:
 
                     logger = logging.getLogger(__name__)
                     logger.warning(
-                        f"Could not get detailed info for table {table.full_name}: {e}"
+                        "Could not get detailed info for table %s: %s",
+                        table.full_name,
+                        e,
                     )
 
                 tables[table.name] = table_info
@@ -123,7 +126,7 @@ class DatabricksClient:
         except Exception as e:
             raise DatabricksConnectionError(
                 f"Failed to list tables in {catalog_name}.{schema_name}: {e}"
-            )
+            ) from e
 
         return tables
 
@@ -196,7 +199,7 @@ class DatabricksClient:
                 )
 
         except Exception as e:
-            raise DatabricksConnectionError(f"Failed to execute SQL: {e}")
+            raise DatabricksConnectionError(f"Failed to execute SQL: {e}") from e
 
     def test_connection(self) -> bool:
         """Test Databricks connection."""

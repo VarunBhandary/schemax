@@ -123,7 +123,8 @@ def generate(
             console.print("\n")
             console.print(
                 Panel(
-                    "[bold green]No changes required[/bold green]\n\nTarget environment matches schema definition.",
+                    "[bold green]No changes required[/bold green]\n\n"
+                    "Target environment matches schema definition.",
                     title="Result",
                     border_style="green",
                 )
@@ -169,6 +170,7 @@ def apply(
             target_catalog=target_catalog,
             target_schema=target_schema,
             dry_run=True,
+            output=None,
         )
 
         # TODO: Implement apply logic

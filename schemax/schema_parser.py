@@ -149,7 +149,8 @@ class SchemaParser:
                 column_names = [c.name for c in table.columns]
                 if len(column_names) != len(set(column_names)):
                     errors.append(
-                        f"Duplicate column names in table '{schema.name}.{table.name}'"
+                        f"Duplicate column names in table "
+                        f"'{schema.name}.{table.name}'"
                     )
 
                 # Validate external table has location

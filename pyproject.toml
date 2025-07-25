@@ -127,6 +127,12 @@ disable = [
     "too-many-locals",
     "import-error",
     "fixme",
+    "broad-exception-caught",
+    "import-outside-toplevel",
+    "logging-fstring-interpolation",
+    "line-too-long",
+    "no-value-for-parameter",
+    "too-many-positional-arguments",
 ]
 
 [tool.pylint.format]

@@ -98,4 +98,4 @@ schemas:
             nullable: false
           - name: avg_session_duration
             type: DOUBLE
-            nullable: true 
+            nullable: true

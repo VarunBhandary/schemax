@@ -218,4 +218,4 @@ bump-minor: ## Bump minor version
 
 bump-major: ## Bump major version
 	@echo "$(YELLOW)Bumping major version...$(RESET)"
-	bump2version major 
+	bump2version major

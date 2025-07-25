@@ -102,7 +102,7 @@ pre-commit run --all-files # Alternative command
 - **Import Style**: Sorted by isort with Black profile
 - **Type Hints**: Required for all public functions and methods
 - **Docstrings**: Google style docstrings for all public APIs
-- **Naming**: 
+- **Naming**:
   - snake_case for functions and variables
   - PascalCase for classes
   - UPPER_CASE for constants
@@ -120,25 +120,25 @@ from schemax.exceptions import SchemaxError
 
 class ExampleClass:
     """Class docstring explaining the purpose.
-    
+
     Args:
         name: The name of the example.
         config: Optional configuration dictionary.
     """
-    
+
     def __init__(self, name: str, config: Optional[Dict[str, Any]] = None) -> None:
         self.name = name
         self.config = config or {}
-    
+
     def process_data(self, data: List[Dict[str, Any]]) -> List[str]:
         """Process data and return list of processed items.
-        
+
         Args:
             data: List of data dictionaries to process.
-            
+
         Returns:
             List of processed item names.
-            
+
         Raises:
             SchemaxError: If data processing fails.
         """
@@ -407,4 +407,4 @@ chore: update dependencies
 
 ---
 
-**Happy coding! 🚀** 
+**Happy coding! 🚀**

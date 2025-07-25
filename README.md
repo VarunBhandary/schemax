@@ -13,7 +13,7 @@ Schemax allows you to:
 ## Features
 
 - **Declarative Schema Definition**: Define your Databricks objects in YAML
-- **LLM-Powered Change Generation**: Uses Databricks LLM endpoints with DSPy for intelligent change script generation  
+- **LLM-Powered Change Generation**: Uses Databricks LLM endpoints with DSPy for intelligent change script generation
 - **Target Environment Inspection**: Automatically compares desired vs actual state
 - **CI/CD Ready**: Designed for pipeline automation
 - **Rich CLI Interface**: Beautiful terminal output with progress indicators
@@ -60,7 +60,7 @@ schemax validate --schema-file schema.yaml
 catalog:
   name: my_catalog
   comment: "Production data catalog"
-  
+
 schemas:
   - name: bronze
     comment: "Raw data layer"
@@ -82,16 +82,68 @@ schemas:
 
 ## Development
 
+### Quick Start
+
 ```bash
-# Install in development mode
-pip install -e .
+# Install in development mode with all dependencies
+pip install -e ".[dev]"
 
-# Run tests
-python -m pytest
+# Install pre-commit hooks (runs automatically on commits)
+pre-commit install
 
-# Format code
-black schemax/
+# Run all checks manually
+make check-all
 ```
+
+### Development Workflow
+
+This project uses **pre-commit hooks** to ensure code quality. The following checks run automatically on every commit:
+
+- ✅ **Black formatting** - Consistent code formatting
+- ✅ **isort** - Import sorting and organization
+- ✅ **Bandit** - Security vulnerability scanning
+- ✅ **File hygiene** - Trailing whitespace, file endings, etc.
+
+### Manual Checks
+
+You can run checks manually using the Makefile:
+
+```bash
+# Run all checks
+make check-all
+
+# Individual checks
+make lint          # Black, isort, flake8, pylint, mypy
+make test          # Run test suite
+make security      # Run security scans
+make format        # Format code with Black and isort
+```
+
+### CI/CD Pipeline
+
+The GitHub Actions workflow runs the same checks as pre-commit, plus:
+
+- **Security scanning** with bandit, safety, and pip-audit
+- **Test coverage** reporting
+- **Package building** and validation
+- **Dependency review** (requires GitHub Advanced Security)
+
+### Troubleshooting
+
+**If pre-commit hooks fail:**
+1. The hooks will automatically fix most issues (formatting, imports)
+2. Re-run `pre-commit run --all-files` to apply fixes
+3. Commit the changes and try again
+
+**If CI fails locally but passes in GitHub:**
+1. Ensure you have the same Python version (3.11)
+2. Run `pip install -e ".[dev]"` to install all dependencies
+3. Use `make check-all` to run the same checks as CI
+
+**Version consistency:**
+- All tool versions are pinned in `pyproject.toml`
+- Pre-commit manages its own environments to ensure consistency
+- The Makefile provides shortcuts for common development tasks
 
 ## CI/CD Pipeline
 
@@ -134,4 +186,4 @@ You can also run comprehensive security scans locally:
 ./scripts/security-scan.sh
 ```
 
-This script runs all security tools and generates detailed reports in the `security-reports/` directory. 
+This script runs all security tools and generates detailed reports in the `security-reports/` directory.

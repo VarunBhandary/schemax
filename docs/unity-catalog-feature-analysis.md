@@ -177,7 +177,7 @@ Support for diverse data formats:
 tables:
   - name: delta_table
     format: DELTA
-  - name: iceberg_table  
+  - name: iceberg_table
     format: ICEBERG
   - name: legacy_data
     format: PARQUET
@@ -273,4 +273,4 @@ schemax generate --schema-file examples/advanced_schema.yaml --target-catalog pr
 
 ---
 
-This comprehensive Unity Catalog feature implementation makes Schemax a production-ready tool for enterprise Databricks schema management with full LLM-powered change generation capabilities. 
+This comprehensive Unity Catalog feature implementation makes Schemax a production-ready tool for enterprise Databricks schema management with full LLM-powered change generation capabilities.

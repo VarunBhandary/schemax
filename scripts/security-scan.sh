@@ -64,4 +64,4 @@ echo "📋 Summary: security-reports/security-summary.txt"
 # Display summary
 echo ""
 echo "=== Security Summary ==="
-cat security-reports/security-summary.txt 
+cat security-reports/security-summary.txt

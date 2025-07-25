@@ -104,9 +104,14 @@ class DatabricksClient:
                 try:
                     detailed_table = self.client.tables.get(full_name=table.full_name)
                     table_info.update(self._table_to_dict(detailed_table))
-                except Exception:
+                except Exception as e:
                     # If we can't get detailed info, continue with basic info
-                    pass
+                    # Log the error for debugging but don't fail the entire operation
+                    import logging
+                    logger = logging.getLogger(__name__)
+                    logger.warning(
+                        f"Could not get detailed info for table {table.full_name}: {e}"
+                    )
 
                 tables[table.name] = table_info
 
@@ -196,5 +201,9 @@ class DatabricksClient:
         try:
             self.client.current_user.me()
             return True
-        except Exception:
+        except Exception as e:
+            # Log the connection error for debugging
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.warning(f"Failed to test Databricks connection: {e}")
             return False

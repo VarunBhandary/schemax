@@ -147,4 +147,20 @@ Thumbs.db
 # Schemax specific
 *.sql
 config.yaml
-dspy_cache/ 
+dspy_cache/
+
+# Linting and security reports
+bandit-report.json
+bandit-report.html
+safety-report.json
+reports/
+htmlcov/
+.coverage
+coverage.xml
+
+# Pre-commit
+.pre-commit-config.yaml.bak
+
+# Development
+.python-version
+.tool-versions 

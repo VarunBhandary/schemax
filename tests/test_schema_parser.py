@@ -1,9 +1,10 @@
 """Tests for schema parser."""
 
 import pytest
-from schemax.schema_parser import SchemaParser
-from schemax.models import SchemaDefinition, Catalog, Schema, Table, Column
+
 from schemax.exceptions import SchemaParsingError, ValidationError
+from schemax.models import Catalog, Column, Schema, SchemaDefinition, Table
+from schemax.schema_parser import SchemaParser
 
 
 def test_parse_simple_schema():

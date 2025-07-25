@@ -44,7 +44,13 @@ jobs:
     - name: Run Safety dependency scan
       run: |
         safety check --json --output safety-report.json || true
-        safety check
+        safety check --full-report
+
+    - name: Run pip-audit for additional dependency scanning
+      run: |
+        pip install pip-audit
+        pip-audit --format json --output pip-audit-report.json || true
+        pip-audit --format text || true
 
     - name: Upload security artifacts
       uses: actions/upload-artifact@v4
@@ -54,6 +60,7 @@ jobs:
         path: |
           bandit-report.json
           safety-report.json
+          pip-audit-report.json
 
   # Code quality and linting job
   lint:
@@ -238,10 +245,17 @@ jobs:
         password: ${{ secrets.PYPI_API_TOKEN }}
 
   # Dependency review (for PRs)
+  # NOTE: This job requires GitHub Advanced Security to be enabled on the repository.
+  # To enable it, go to Settings > Security & analysis > Dependency graph and enable it.
+  # For private repositories, GitHub Advanced Security license is also required.
+  # 
+  # Alternative: The security job above already runs safety and pip-audit for dependency scanning
+  # which provides similar functionality without requiring GitHub Advanced Security.
   dependency-review:
     name: Dependency Review
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
+    continue-on-error: true  # Don't fail the entire workflow if this step fails
     
     steps:
     - name: Checkout Repository

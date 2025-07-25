@@ -1,11 +1,13 @@
 """DSPy-powered change script generator."""
 
+from typing import Any, Dict, List, Optional
+
 import dspy
-from typing import List, Dict, Any, Optional
+
 from .config import Config
-from .models import SchemaDefinition, CurrentState, ChangeScript, Schema, Table, Column
 from .databricks_client import DatabricksClient
 from .exceptions import ChangeGenerationError
+from .models import ChangeScript, Column, CurrentState, Schema, SchemaDefinition, Table
 
 
 class DatabricksLLM(dspy.LM):

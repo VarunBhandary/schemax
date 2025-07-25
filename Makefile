@@ -81,12 +81,19 @@ security: ## Run security scans
 	safety check
 	@echo "$(GREEN)Security scans complete!$(RESET)"
 
+security-comprehensive: ## Run comprehensive security scans (alternative to GitHub Advanced Security)
+	@echo "$(YELLOW)Running comprehensive security scans...$(RESET)"
+	./scripts/security-scan.sh
+	@echo "$(GREEN)Comprehensive security scans complete!$(RESET)"
+
 security-report: ## Generate detailed security reports
 	@echo "$(YELLOW)Generating security reports...$(RESET)"
 	mkdir -p reports
 	bandit -r $(SRC_DIR)/ -f json -o reports/bandit-report.json
 	bandit -r $(SRC_DIR)/ -f html -o reports/bandit-report.html
 	safety check --json --output reports/safety-report.json || true
+	pip install pip-audit
+	pip-audit --format json --output reports/pip-audit-report.json || true
 	@echo "$(GREEN)Security reports generated in reports/ directory$(RESET)"
 
 # Pre-commit hooks
@@ -142,7 +149,8 @@ dev-setup: dev-install install-hooks ## Complete development setup
 	@echo "$(BLUE)You can now run:$(RESET)"
 	@echo "  make lint     - Run linting checks"
 	@echo "  make test     - Run tests"
-	@echo "  make security - Run security scans"
+	@echo "  make security - Run basic security scans"
+	@echo "  make security-comprehensive - Run comprehensive security scans (alternative to GitHub Advanced Security)"
 	@echo "  make check-all - Run all checks"
 
 # Environment info

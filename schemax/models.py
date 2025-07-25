@@ -1,9 +1,10 @@
 """Pydantic models for schema definitions."""
 
-from typing import List, Optional, Dict, Any, Union
-from enum import Enum
 from datetime import datetime
-from pydantic import BaseModel, field_validator, Field
+from enum import Enum
+from typing import Any, Dict, List, Optional, Union
+
+from pydantic import BaseModel, Field, field_validator
 
 
 class TableType(str, Enum):
@@ -323,12 +324,12 @@ class CurrentState(BaseModel):
     catalog_properties: Dict[str, str] = {}
     catalog_tags: List[Tag] = []
     schemas: Dict[str, Dict[str, Any]] = {}  # schema_name -> schema_info
-    tables: Dict[
-        str, Dict[str, Dict[str, Any]]
-    ] = {}  # schema_name -> table_name -> table_info
-    volumes: Dict[
-        str, Dict[str, Dict[str, Any]]
-    ] = {}  # schema_name -> volume_name -> volume_info
+    tables: Dict[str, Dict[str, Dict[str, Any]]] = (
+        {}
+    )  # schema_name -> table_name -> table_info
+    volumes: Dict[str, Dict[str, Dict[str, Any]]] = (
+        {}
+    )  # schema_name -> volume_name -> volume_info
 
     def schema_exists(self, schema_name: str) -> bool:
         """Check if schema exists."""

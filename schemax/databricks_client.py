@@ -1,18 +1,19 @@
 """Databricks client for environment inspection."""
 
-from typing import Dict, List, Optional, Any
+from typing import Any, Dict, List, Optional
+
 from databricks.sdk import WorkspaceClient
 from databricks.sdk.errors import NotFound, PermissionDenied
 from databricks.sdk.service.catalog import (
     CatalogInfo,
+    ColumnInfo,
     SchemaInfo,
     TableInfo,
-    ColumnInfo,
 )
 
 from .config import Config
-from .models import CurrentState
 from .exceptions import DatabricksConnectionError
+from .models import CurrentState
 
 
 class DatabricksClient:

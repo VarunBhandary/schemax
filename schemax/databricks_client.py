@@ -108,6 +108,7 @@ class DatabricksClient:
                     # If we can't get detailed info, continue with basic info
                     # Log the error for debugging but don't fail the entire operation
                     import logging
+
                     logger = logging.getLogger(__name__)
                     logger.warning(
                         f"Could not get detailed info for table {table.full_name}: {e}"
@@ -204,6 +205,7 @@ class DatabricksClient:
         except Exception as e:
             # Log the connection error for debugging
             import logging
+
             logger = logging.getLogger(__name__)
             logger.warning(f"Failed to test Databricks connection: {e}")
             return False

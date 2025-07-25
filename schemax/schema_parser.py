@@ -25,9 +25,11 @@ class SchemaParser:
             return self.parse_dict(data)
 
         except yaml.YAMLError as e:
-            raise SchemaParsingError(f"Invalid YAML in {filepath}: {e}")
+            raise SchemaParsingError(f"Invalid YAML in {filepath}: {e}") from e
         except Exception as e:
-            raise SchemaParsingError(f"Failed to parse schema file {filepath}: {e}")
+            raise SchemaParsingError(
+                f"Failed to parse schema file {filepath}: {e}"
+            ) from e
 
     def parse_dict(self, data: Dict[str, Any]) -> SchemaDefinition:
         """Parse schema definition from dictionary."""
@@ -55,7 +57,7 @@ class SchemaParser:
         except ValidationError:
             raise
         except Exception as e:
-            raise SchemaParsingError(f"Failed to parse schema definition: {e}")
+            raise SchemaParsingError(f"Failed to parse schema definition: {e}") from e
 
     def _parse_schema(self, schema_data: Dict[str, Any]) -> Schema:
         """Parse a single schema definition."""
@@ -147,7 +149,8 @@ class SchemaParser:
                 column_names = [c.name for c in table.columns]
                 if len(column_names) != len(set(column_names)):
                     errors.append(
-                        f"Duplicate column names in table '{schema.name}.{table.name}'"
+                        f"Duplicate column names in table "
+                        f"'{schema.name}.{table.name}'"
                     )
 
                 # Validate external table has location

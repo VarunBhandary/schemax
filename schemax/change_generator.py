@@ -1,13 +1,13 @@
 """DSPy-powered change script generator."""
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 import dspy
 
 from .config import Config
 from .databricks_client import DatabricksClient
 from .exceptions import ChangeGenerationError
-from .models import ChangeScript, Column, CurrentState, Schema, SchemaDefinition, Table
+from .models import ChangeScript, CurrentState, SchemaDefinition
 
 
 class DatabricksLLM(dspy.LM):
@@ -43,13 +43,13 @@ class DatabricksLLM(dspy.LM):
                 prediction = response.predictions[0]
                 if isinstance(prediction, dict) and "candidates" in prediction:
                     return {"choices": [{"text": prediction["candidates"][0]["text"]}]}
-                elif isinstance(prediction, str):
+                if isinstance(prediction, str):
                     return {"choices": [{"text": prediction}]}
 
             raise ChangeGenerationError("No valid response from LLM endpoint")
 
         except Exception as e:
-            raise ChangeGenerationError(f"Failed to call LLM endpoint: {e}")
+            raise ChangeGenerationError(f"Failed to call LLM endpoint: {e}") from e
 
 
 class SchemaAnalyzer(dspy.Signature):
@@ -116,6 +116,7 @@ class SchemaChangeAnalyzer(dspy.Module):
         catalog_name: str,
         schema_name: str = "",
     ):
+        """Analyze schema differences and generate change requirements."""
         return self.analyze(
             desired_schema=desired_schema,
             current_state=current_state,
@@ -134,6 +135,7 @@ class SQLScriptGenerator(dspy.Module):
     def forward(
         self, analysis: str, changes_needed: str, catalog_name: str, schema_name: str
     ):
+        """Generate SQL script from analysis and changes."""
         return self.generate(
             analysis=analysis,
             changes_needed=changes_needed,
@@ -150,6 +152,7 @@ class SQLValidator(dspy.Module):
         self.validate = dspy.ChainOfThought(ChangeValidator)
 
     def forward(self, sql_script: str, original_analysis: str):
+        """Validate SQL script against original analysis."""
         return self.validate(sql_script=sql_script, original_analysis=original_analysis)
 
 
@@ -228,7 +231,7 @@ class ChangeGenerator:
             return ChangeScript(sql=final_sql, changes=changes, warnings=warnings)
 
         except Exception as e:
-            raise ChangeGenerationError(f"Failed to generate change script: {e}")
+            raise ChangeGenerationError(f"Failed to generate change script: {e}") from e
 
     def _schema_def_to_string(self, schema_def: SchemaDefinition) -> str:
         """Convert schema definition to string representation."""

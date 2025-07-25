@@ -1,7 +1,6 @@
 """Configuration management for Schemax."""
 
 import os
-from pathlib import Path
 from typing import Any, Dict, Optional
 
 import yaml
@@ -34,6 +33,7 @@ class Config(BaseModel):
     @field_validator("databricks_host")
     @classmethod
     def validate_host(cls, v):
+        """Validate and format Databricks host URL."""
         if not v:
             raise ValueError("Databricks host is required")
         if not v.startswith(("https://", "http://")):
@@ -43,6 +43,7 @@ class Config(BaseModel):
     @field_validator("databricks_token")
     @classmethod
     def validate_token(cls, v):
+        """Validate Databricks token is provided."""
         if not v:
             raise ValueError("Databricks token is required")
         return v
@@ -55,14 +56,14 @@ class Config(BaseModel):
         # Load from config file if provided
         if config_file:
             try:
-                with open(config_file, "r") as f:
+                with open(config_file, "r", encoding="utf-8") as f:
                     file_config = yaml.safe_load(f)
                     if file_config:
                         config_data.update(file_config)
             except Exception as e:
                 raise ConfigurationError(
                     f"Failed to load config file {config_file}: {e}"
-                )
+                ) from e
 
         # Override with environment variables
         env_mapping = {
@@ -94,7 +95,7 @@ class Config(BaseModel):
         try:
             return cls(**config_data)
         except Exception as e:
-            raise ConfigurationError(f"Invalid configuration: {e}")
+            raise ConfigurationError(f"Invalid configuration: {e}") from e
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert config to dictionary."""
@@ -107,7 +108,9 @@ class Config(BaseModel):
         config_dict.pop("databricks_token", None)
 
         try:
-            with open(filepath, "w") as f:
+            with open(filepath, "w", encoding="utf-8") as f:
                 yaml.dump(config_dict, f, default_flow_style=False)
         except Exception as e:
-            raise ConfigurationError(f"Failed to save config file {filepath}: {e}")
+            raise ConfigurationError(
+                f"Failed to save config file {filepath}: {e}"
+            ) from e

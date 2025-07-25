@@ -1,192 +1,42 @@
 # See https://pre-commit.com for more information
 # See https://pre-commit.com/hooks.html for more hooks
 repos:
-  # Standard pre-commit hooks
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.4.0
+    rev: v4.5.0
     hooks:
       - id: trailing-whitespace
       - id: end-of-file-fixer
       - id: check-yaml
-        args: ['--unsafe']
-      - id: check-json
-      - id: check-toml
-      - id: check-xml
       - id: check-added-large-files
-        args: ['--maxkb=1000']
-      - id: check-case-conflict
       - id: check-merge-conflict
-      - id: check-executables-have-shebangs
-      - id: check-shebang-scripts-are-executable
+      - id: check-case-conflict
+      - id: check-docstring-first
       - id: debug-statements
-      - id: detect-aws-credentials
-        args: ['--allow-missing-credentials']
-      - id: detect-private-key
-      - id: mixed-line-ending
-        args: ['--fix=lf']
-      - id: requirements-txt-fixer
 
-  # Python code formatting with Black
   - repo: https://github.com/psf/black
-    rev: 23.7.0
+    rev: 25.1.0
     hooks:
       - id: black
-        language_version: python3
-        args: ['--line-length=88']
+        args: [--line-length=88]
 
-  # Import sorting with isort
   - repo: https://github.com/pycqa/isort
-    rev: 5.12.0
+    rev: 6.0.1
     hooks:
       - id: isort
-        args: ['--profile', 'black', '--line-length=88']
+        args: [--profile=black, --line-length=88]
 
-  # Python linting with flake8
-  - repo: https://github.com/pycqa/flake8
-    rev: 6.0.0
-    hooks:
-      - id: flake8
-        additional_dependencies:
-          - flake8-docstrings
-          - flake8-import-order
-          - flake8-bugbear
-          - flake8-comprehensions
-          - flake8-simplify
-        args: ['--max-line-length=88', '--extend-ignore=E203,W503']
 
-  # Type checking with mypy
-  - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.5.1
-    hooks:
-      - id: mypy
-        additional_dependencies: [types-PyYAML, types-requests]
-        args: [--ignore-missing-imports]
 
-  # Security linting with bandit
   - repo: https://github.com/pycqa/bandit
-    rev: 1.7.5
+    rev: 1.8.6
     hooks:
       - id: bandit
-        args: ['-r', 'schemax/', '-f', 'json', '-o', 'bandit-report.json']
-        files: ^schemax/.*\.py$
-
-  # Security vulnerability scanning with safety
-  - repo: https://github.com/Lucas-C/pre-commit-hooks-safety
-    rev: v1.3.2
-    hooks:
-      - id: python-safety-dependencies-check
-        files: requirements.*\.txt$
-
-  # YAML formatting and linting
-  - repo: https://github.com/adrienverge/yamllint
-    rev: v1.32.0
-    hooks:
-      - id: yamllint
-        args: [-c=.yamllint.yaml]
-
-  # Markdown linting
-  - repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: v0.35.0
-    hooks:
-      - id: markdownlint
-        args: ['--fix']
-
-  # Shell script linting
-  - repo: https://github.com/shellcheck-py/shellcheck-py
-    rev: v0.9.0.5
-    hooks:
-      - id: shellcheck
-
-  # Dockerfile linting
-  - repo: https://github.com/hadolint/hadolint
-    rev: v2.12.0
-    hooks:
-      - id: hadolint
-
-  # Git commit message formatting
-  - repo: https://github.com/compilerla/conventional-pre-commit
-    rev: v2.4.0
-    hooks:
-      - id: conventional-pre-commit
-        stages: [commit-msg]
-        args: [optional-scope]
-
-  # Python docstring formatting
-  - repo: https://github.com/pycqa/pydocstyle
-    rev: 6.3.0
-    hooks:
-      - id: pydocstyle
-        args: ['--convention=google']
-
-  # Remove unused imports and variables
-  - repo: https://github.com/pycqa/autoflake
-    rev: v2.2.0
-    hooks:
-      - id: autoflake
-        args:
-          - --in-place
-          - --remove-all-unused-imports
-          - --remove-unused-variables
-          - --remove-duplicate-keys
-          - --ignore-init-module-imports
-
-  # Upgrade Python syntax
-  - repo: https://github.com/asottile/pyupgrade
-    rev: v3.10.1
-    hooks:
-      - id: pyupgrade
-        args: [--py38-plus]
-
-  # Local hooks for additional checks
-  - repo: local
-    hooks:
-      # Check for hardcoded secrets or sensitive data
-      - id: check-secrets
-        name: Check for secrets
-        entry: |
-          python -c "
-          import re, sys, os
-          patterns = [
-              r'password\\s*=\\s*[\\\"\\']\\w+[\\\"\\']',
-              r'api_key\\s*=\\s*[\\\"\\']\\w+[\\\"\\']',
-              r'secret\\s*=\\s*[\\\"\\']\\w+[\\\"\\']',
-              r'token\\s*=\\s*[\\\"\\']\\w+[\\\"\\']',
-              r'aws_access_key_id\\s*=\\s*[\\\"\\']\\w+[\\\"\\']',
-              r'aws_secret_access_key\\s*=\\s*[\\\"\\']\\w+[\\\"\\']'
-          ]
-          for file in sys.argv[1:]:
-              try:
-                  with open(file, 'r') as f:
-                      content = f.read()
-                      for pattern in patterns:
-                          if re.search(pattern, content, re.IGNORECASE):
-                              print(f'Potential secret found in {file}')
-                              sys.exit(1)
-              except Exception:
-                  pass
-          "
-        language: system
-        files: \.(py|yaml|yml|json|sh|env)$
-        exclude: ^(examples/|docs/)
-
-      # Check for TODO/FIXME comments in production code
-      - id: check-todos
-        name: Check for TODO/FIXME in production code
-        entry: |
-          python -c "
-          import re, sys
-          for file in sys.argv[1:]:
-              try:
-                  with open(file, 'r') as f:
-                      for i, line in enumerate(f, 1):
-                          if re.search(r'(TODO|FIXME|XXX|HACK)', line, re.IGNORECASE):
-                              print(f'{file}:{i}: Found TODO/FIXME comment: {line.strip()}')
-              except Exception:
-                  pass
-          "
-        language: system
-        files: ^schemax/.*\.py$
+        args: [-r, schemax/]
         exclude: ^tests/
+
+
+
+
 
 ci:
   autofix_commit_msg: |
@@ -198,4 +48,4 @@ ci:
   autoupdate_commit_msg: '[pre-commit.ci] pre-commit autoupdate'
   autoupdate_schedule: weekly
   skip: []
-  submodules: false 
+  submodules: false

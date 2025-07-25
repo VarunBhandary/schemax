@@ -2,9 +2,9 @@
 
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, field_validator
 
 
 class TableType(str, Enum):
@@ -73,6 +73,7 @@ class Tag(BaseModel):
     @field_validator("key")
     @classmethod
     def validate_key(cls, v):
+        """Validate tag key is not empty."""
         if not v or not v.strip():
             raise ValueError("Tag key cannot be empty")
         return v.strip()
@@ -97,6 +98,7 @@ class Constraint(BaseModel):
     @field_validator("columns")
     @classmethod
     def validate_columns(cls, v, info):
+        """Validate constraint columns based on constraint type."""
         constraint_type = info.data.get("type")
         if (
             constraint_type in [ConstraintType.PRIMARY_KEY, ConstraintType.FOREIGN_KEY]
@@ -128,6 +130,7 @@ class Column(BaseModel):
     @field_validator("name")
     @classmethod
     def validate_name(cls, v):
+        """Validate column name is not empty."""
         if not v or not v.strip():
             raise ValueError("Column name cannot be empty")
         return v.strip()
@@ -141,6 +144,7 @@ class ClusteringSpec(BaseModel):
     @field_validator("columns")
     @classmethod
     def validate_columns(cls, v):
+        """Validate clustering columns are not empty."""
         if not v:
             raise ValueError("Clustering columns cannot be empty")
         return v
@@ -178,6 +182,7 @@ class Table(BaseModel):
     @field_validator("name")
     @classmethod
     def validate_name(cls, v):
+        """Validate table name is not empty."""
         if not v or not v.strip():
             raise ValueError("Table name cannot be empty")
         return v.strip()
@@ -185,6 +190,7 @@ class Table(BaseModel):
     @field_validator("location")
     @classmethod
     def validate_location(cls, v, info):
+        """Validate location for external tables."""
         # External tables must have a location
         if info.data.get("type") == TableType.EXTERNAL and not v:
             raise ValueError("External tables must specify a location")
@@ -220,6 +226,7 @@ class Volume(BaseModel):
     @field_validator("name")
     @classmethod
     def validate_name(cls, v):
+        """Validate volume name is not empty."""
         if not v or not v.strip():
             raise ValueError("Volume name cannot be empty")
         return v.strip()
@@ -227,6 +234,7 @@ class Volume(BaseModel):
     @field_validator("location")
     @classmethod
     def validate_location(cls, v, info):
+        """Validate location for external volumes."""
         # External volumes must have a location
         if info.data.get("type") == VolumeType.EXTERNAL and not v:
             raise ValueError("External volumes must specify a location")
@@ -256,6 +264,7 @@ class Schema(BaseModel):
     @field_validator("name")
     @classmethod
     def validate_name(cls, v):
+        """Validate schema name is not empty."""
         if not v or not v.strip():
             raise ValueError("Schema name cannot be empty")
         return v.strip()
@@ -285,6 +294,7 @@ class Catalog(BaseModel):
     @field_validator("name")
     @classmethod
     def validate_name(cls, v):
+        """Validate catalog name is not empty."""
         if not v or not v.strip():
             raise ValueError("Catalog name cannot be empty")
         return v.strip()

@@ -46,4 +46,4 @@ updates:
     labels:
       - "dependencies"
       - "github-actions"
-      - "ci" 
+      - "ci"

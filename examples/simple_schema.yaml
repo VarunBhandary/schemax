@@ -1,0 +1,28 @@
+catalog:
+  name: test_catalog
+  comment: "Test catalog for development"
+
+schemas:
+  - name: demo
+    comment: "Demo schema"
+    tables:
+      - name: users
+        type: MANAGED
+        comment: "User information table"
+        columns:
+          - name: id
+            type: BIGINT
+            nullable: false
+            comment: "User ID"
+          - name: email
+            type: STRING
+            nullable: false
+            comment: "User email address"
+          - name: name
+            type: STRING
+            nullable: true
+            comment: "Full name"
+          - name: created_at
+            type: TIMESTAMP
+            nullable: false
+            comment: "Account creation time" 

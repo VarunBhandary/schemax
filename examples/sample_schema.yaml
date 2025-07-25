@@ -1,0 +1,101 @@
+catalog:
+  name: production_catalog
+  comment: "Main production data catalog"
+
+schemas:
+  - name: bronze
+    comment: "Raw data ingestion layer"
+    tables:
+      - name: user_events
+        type: EXTERNAL
+        location: "s3://data-lake/bronze/user-events/"
+        comment: "Raw user interaction events"
+        columns:
+          - name: user_id
+            type: STRING
+            nullable: false
+            comment: "Unique user identifier"
+          - name: event_time
+            type: TIMESTAMP
+            nullable: false
+            comment: "When the event occurred"
+          - name: event_type
+            type: STRING
+            nullable: false
+            comment: "Type of user event"
+          - name: properties
+            type: STRING
+            nullable: true
+            comment: "JSON string of additional event properties"
+        partitioned_by:
+          - event_date
+
+      - name: product_catalog
+        type: EXTERNAL
+        location: "s3://data-lake/bronze/products/"
+        comment: "Product catalog data"
+        columns:
+          - name: product_id
+            type: STRING
+            nullable: false
+          - name: product_name
+            type: STRING
+            nullable: false
+          - name: category
+            type: STRING
+            nullable: true
+          - name: price
+            type: DECIMAL(10,2)
+            nullable: false
+          - name: created_at
+            type: TIMESTAMP
+            nullable: false
+
+  - name: silver
+    comment: "Cleaned and structured data layer"
+    tables:
+      - name: user_sessions
+        type: MANAGED
+        comment: "Aggregated user session data"
+        columns:
+          - name: session_id
+            type: STRING
+            nullable: false
+          - name: user_id
+            type: STRING
+            nullable: false
+          - name: session_start
+            type: TIMESTAMP
+            nullable: false
+          - name: session_end
+            type: TIMESTAMP
+            nullable: true
+          - name: page_views
+            type: INT
+            nullable: false
+          - name: events_count
+            type: INT
+            nullable: false
+
+  - name: gold
+    comment: "Analytics-ready aggregated data"
+    tables:
+      - name: daily_user_metrics
+        type: MANAGED
+        comment: "Daily aggregated user metrics"
+        columns:
+          - name: date
+            type: DATE
+            nullable: false
+          - name: active_users
+            type: BIGINT
+            nullable: false
+          - name: new_users
+            type: BIGINT
+            nullable: false
+          - name: total_sessions
+            type: BIGINT
+            nullable: false
+          - name: avg_session_duration
+            type: DOUBLE
+            nullable: true 

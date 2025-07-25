@@ -1,0 +1,364 @@
+catalog:
+  name: production_lakehouse
+  comment: "Advanced production data catalog with full Unity Catalog features"
+  owner: "data_platform_team"
+  managed_location: "s3://company-data-lake/unity-catalog/"
+  bound_workspaces:
+    - "prod-workspace-001"
+    - "prod-workspace-002"
+  tags:
+    - key: "environment"
+      value: "production"
+    - key: "cost_center"
+      value: "data_platform"
+    - key: "data_classification"
+      value: "internal"
+
+schemas:
+  - name: customer_data
+    comment: "Customer and user data with PII protection"
+    owner: "customer_analytics_team"
+    managed_location: "s3://company-data-lake/customer/"
+    tags:
+      - key: "data_domain"
+        value: "customer"
+      - key: "contains_pii"
+        value: "true"
+      - key: "retention_policy"
+        value: "7_years"
+    
+    volumes:
+      - name: customer_documents
+        type: EXTERNAL
+        location: "s3://company-documents/customer-files/"
+        comment: "Customer uploaded documents and files"
+        owner: "customer_analytics_team"
+        tags:
+          - key: "data_type"
+            value: "unstructured"
+          - key: "security_level"
+            value: "high"
+      
+      - name: ml_models
+        type: MANAGED
+        comment: "Customer ML models and artifacts"
+        owner: "ml_engineering_team"
+        tags:
+          - key: "asset_type"
+            value: "ml_artifacts"
+    
+    tables:
+      - name: customers
+        type: MANAGED
+        format: DELTA
+        comment: "Master customer table with PII protection"
+        owner: "customer_analytics_team"
+        cluster_by:
+          columns: ["customer_id", "registration_date"]
+        row_filter: "is_account_group_member('customer_analytics_team') OR region = current_user_region()"
+        tags:
+          - key: "data_quality"
+            value: "high"
+          - key: "update_frequency"
+            value: "real_time"
+        constraints:
+          - name: "customers_pk"
+            type: PRIMARY_KEY
+            columns: ["customer_id"]
+            rely: true
+          - name: "valid_email_check"
+            type: CHECK
+            expression: "email LIKE '%@%'"
+            enforced: true
+        columns:
+          - name: customer_id
+            type: BIGINT
+            nullable: false
+            comment: "Unique customer identifier"
+            primary_key: true
+            tags:
+              - key: "identifier"
+                value: "primary"
+          - name: email
+            type: STRING
+            nullable: false
+            comment: "Customer email address"
+            mask_expression: "CASE WHEN is_account_group_member('customer_support') THEN email ELSE regexp_replace(email, '(.{2}).+(@.+)', '$1***$2') END"
+            tags:
+              - key: "pii_type"
+                value: "contact_info"
+          - name: first_name
+            type: STRING
+            nullable: false
+            comment: "Customer first name"
+            mask_expression: "CASE WHEN is_account_group_member('customer_analytics_team') THEN first_name ELSE LEFT(first_name, 1) || '***' END"
+            tags:
+              - key: "pii_type"
+                value: "personal_name"
+          - name: last_name
+            type: STRING
+            nullable: false
+            comment: "Customer last name"
+            mask_expression: "CASE WHEN is_account_group_member('customer_analytics_team') THEN last_name ELSE LEFT(last_name, 1) || '***' END"
+            tags:
+              - key: "pii_type"
+                value: "personal_name"
+          - name: phone_number
+            type: STRING
+            nullable: true
+            comment: "Customer phone number"
+            mask_expression: "CASE WHEN is_account_group_member('customer_support') THEN phone_number ELSE 'XXX-XXX-' || RIGHT(phone_number, 4) END"
+            tags:
+              - key: "pii_type"
+                value: "contact_info"
+          - name: date_of_birth
+            type: DATE
+            nullable: true
+            comment: "Customer date of birth"
+            mask_expression: "CASE WHEN is_account_group_member('compliance_team') THEN date_of_birth ELSE NULL END"
+            tags:
+              - key: "pii_type"
+                value: "sensitive_personal"
+          - name: registration_date
+            type: TIMESTAMP
+            nullable: false
+            comment: "When customer registered"
+          - name: customer_tier
+            type: STRING
+            nullable: false
+            default_value: "standard"
+            comment: "Customer tier (standard, premium, enterprise)"
+          - name: region
+            type: STRING
+            nullable: false
+            comment: "Customer region for data residency"
+        properties:
+          delta.enableChangeDataFeed: "true"
+          delta.autoOptimize.optimizeWrite: "true"
+          delta.autoOptimize.autoCompact: "true"
+
+      - name: customer_addresses
+        type: MANAGED
+        format: DELTA
+        comment: "Customer address information"
+        owner: "customer_analytics_team"
+        tags:
+          - key: "data_quality"
+            value: "medium"
+        constraints:
+          - name: "addresses_pk"
+            type: PRIMARY_KEY
+            columns: ["address_id"]
+          - name: "addresses_customer_fk"
+            type: FOREIGN_KEY
+            columns: ["customer_id"]
+            referenced_table: "customers"
+            referenced_columns: ["customer_id"]
+        columns:
+          - name: address_id
+            type: BIGINT
+            nullable: false
+            comment: "Unique address identifier"
+            primary_key: true
+          - name: customer_id
+            type: BIGINT
+            nullable: false
+            comment: "Reference to customer"
+          - name: address_line_1
+            type: STRING
+            nullable: false
+            comment: "Primary address line"
+            tags:
+              - key: "pii_type"
+                value: "address"
+          - name: address_line_2
+            type: STRING
+            nullable: true
+            comment: "Secondary address line"
+            tags:
+              - key: "pii_type"
+                value: "address"
+          - name: city
+            type: STRING
+            nullable: false
+            comment: "City"
+          - name: state_province
+            type: STRING
+            nullable: false
+            comment: "State or province"
+          - name: postal_code
+            type: STRING
+            nullable: false
+            comment: "Postal or ZIP code"
+          - name: country
+            type: STRING
+            nullable: false
+            comment: "Country code (ISO 3166-1 alpha-2)"
+          - name: address_type
+            type: STRING
+            nullable: false
+            comment: "Type of address (billing, shipping, etc.)"
+          - name: is_primary
+            type: BOOLEAN
+            nullable: false
+            default_value: "false"
+            comment: "Whether this is the primary address"
+
+  - name: financial_data
+    comment: "Financial transactions and sensitive data"
+    owner: "finance_team"
+    tags:
+      - key: "data_domain"
+        value: "finance"
+      - key: "security_level"
+        value: "restricted"
+      - key: "compliance"
+        value: "sox_pci"
+    
+    tables:
+      - name: transactions
+        type: MANAGED
+        format: DELTA
+        comment: "Financial transaction records"
+        owner: "finance_team"
+        cluster_by:
+          columns: ["transaction_date", "customer_id"]
+        partitioned_by: ["transaction_date"]
+        tags:
+          - key: "data_quality"
+            value: "critical"
+          - key: "update_frequency"
+            value: "real_time"
+        constraints:
+          - name: "transactions_pk"
+            type: PRIMARY_KEY
+            columns: ["transaction_id"]
+          - name: "positive_amount_check"
+            type: CHECK
+            expression: "amount > 0"
+          - name: "valid_currency_check"
+            type: CHECK
+            expression: "currency_code IN ('USD', 'EUR', 'GBP', 'JPY')"
+          - name: "transactions_customer_fk"
+            type: FOREIGN_KEY
+            columns: ["customer_id"]
+            referenced_table: "customer_data.customers"
+            referenced_columns: ["customer_id"]
+        columns:
+          - name: transaction_id
+            type: BIGINT
+            nullable: false
+            comment: "Unique transaction identifier"
+            primary_key: true
+          - name: customer_id
+            type: BIGINT
+            nullable: false
+            comment: "Customer who made the transaction"
+          - name: amount
+            type: DECIMAL(15,2)
+            nullable: false
+            comment: "Transaction amount"
+            tags:
+              - key: "sensitive"
+                value: "financial"
+          - name: currency_code
+            type: STRING
+            nullable: false
+            comment: "Currency code (ISO 4217)"
+          - name: transaction_date
+            type: DATE
+            nullable: false
+            comment: "Date of transaction"
+          - name: transaction_time
+            type: TIMESTAMP
+            nullable: false
+            comment: "Exact time of transaction"
+          - name: merchant_id
+            type: STRING
+            nullable: true
+            comment: "Merchant identifier"
+          - name: payment_method
+            type: STRING
+            nullable: false
+            comment: "Payment method used"
+          - name: status
+            type: STRING
+            nullable: false
+            comment: "Transaction status"
+        properties:
+          delta.enableChangeDataFeed: "true"
+          delta.logRetentionDuration: "interval 2 years"
+          delta.deletedFileRetentionDuration: "interval 2 years"
+
+  - name: analytics_workspace
+    comment: "Derived tables and analytics datasets"
+    owner: "analytics_team"
+    tags:
+      - key: "data_domain"
+        value: "analytics"
+      - key: "data_quality"
+        value: "derived"
+    
+    volumes:
+      - name: ml_experiments
+        type: MANAGED
+        comment: "ML experiment data and results"
+        owner: "ml_engineering_team"
+        tags:
+          - key: "asset_type"
+            value: "experiments"
+      
+      - name: report_exports
+        type: MANAGED
+        comment: "Generated reports and exports"
+        owner: "analytics_team"
+        tags:
+          - key: "asset_type"
+            value: "reports"
+    
+    tables:
+      - name: customer_metrics_daily
+        type: MANAGED
+        format: DELTA
+        comment: "Daily aggregated customer metrics"
+        owner: "analytics_team"
+        cluster_by:
+          columns: ["metric_date", "customer_tier"]
+        partitioned_by: ["metric_date"]
+        tags:
+          - key: "aggregation_level"
+            value: "daily"
+          - key: "data_freshness"
+            value: "T+1"
+        columns:
+          - name: metric_date
+            type: DATE
+            nullable: false
+            comment: "Date for metrics"
+          - name: customer_tier
+            type: STRING
+            nullable: false
+            comment: "Customer tier"
+          - name: total_customers
+            type: BIGINT
+            nullable: false
+            comment: "Total customer count"
+          - name: new_customers
+            type: BIGINT
+            nullable: false
+            comment: "New customers added"
+          - name: total_transaction_amount
+            type: DECIMAL(18,2)
+            nullable: false
+            comment: "Total transaction amount"
+          - name: avg_transaction_amount
+            type: DECIMAL(15,2)
+            nullable: false
+            comment: "Average transaction amount"
+          - name: transaction_count
+            type: BIGINT
+            nullable: false
+            comment: "Total number of transactions"
+        properties:
+          delta.autoOptimize.optimizeWrite: "true"
+          delta.autoOptimize.autoCompact: "true" 
